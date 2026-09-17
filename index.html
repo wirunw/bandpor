@@ -136,6 +136,17 @@ select,input[type=text]{width:100%;font-family:inherit;font-size:.9rem;padding:9
   border:1px solid var(--gold);border-radius:6px;padding:3px 8px;font-size:.78rem}
 .km b{font-family:var(--mono);font-weight:700;color:var(--gold);font-size:.82rem}
 .km span{font-family:var(--mono);font-weight:700;color:var(--navy)}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin-top:10px}
+.fchip{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line-2);
+  border-radius:7px;padding:3px 8px;background:var(--surface);font-family:var(--mono);
+  font-size:.82rem;font-weight:700;color:var(--navy);line-height:1.5}
+.fchip .i{font-size:.64rem;color:var(--muted);font-weight:700}
+.fchip.tonic{border-color:var(--gold);background:var(--gold-soft);color:var(--gold)}
+.fchip.min{border-style:dashed}
+.farrow{color:var(--muted);font-size:.8rem;opacity:.7}
+.dia{margin-top:9px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.dia svg{display:block;max-width:100%;height:auto}
+.dia-legend{font-size:.7rem;color:var(--muted);margin-top:4px}
 .empty{color:var(--muted);font-size:.82rem;padding:14px;text-align:center}
 .checkrow{display:flex;align-items:center;gap:9px;font-size:.83rem;color:var(--muted);margin-top:14px}
 .checkrow input{width:18px;height:18px;accent-color:var(--ok)}
@@ -283,6 +294,7 @@ footer{margin-top:30px;padding-top:16px;border-top:1px solid var(--line);
   <button class="btn btn-primary" id="stageBtn">โหมดซ้อม</button>
   <button class="btn" id="metroBtn">เมโทรนอม</button>
   <button class="btn" id="degBtn">เลขดีกรี</button>
+  <button class="btn" id="diaBtn">คอเบส</button>
   <button class="btn" onclick="window.print()">พิมพ์</button>
   <button class="btn btn-icon" id="themeBtn" title="สลับธีม">◐</button>
 </div>
@@ -394,14 +406,108 @@ function keyMap(key,flats){
  return '<div class="keymap">'+h+'</div>';
 }
 
+/* ---- Box pattern บนคอเบส ---- */
+const CHAIN={E:['E','A','D','G'],A:['A','D','G','G']};
+const STROW={G:0,D:1,A:2,E:3};
+const OPEN={E:4,A:9,D:2,G:7};
+/* เลือกสายและเฟรตของ root ให้กล่องอยู่ช่วงคอที่เล่นสะดวก */
+function rootAnchor(pc){
+ const cands=[{str:'E',R:((pc-OPEN.E)%12+12)%12},{str:'A',R:((pc-OPEN.A)%12+12)%12}];
+ cands.forEach(c=>{c.cost=Math.abs(c.R-5)+(c.R>9?12:0)+(c.R===0?1.5:0)});
+ return cands.sort((a,b)=>a.cost-b.cost)[0];
+}
+/* ดีกรี d (0-11) อยู่ตรงไหนในกล่อง */
+function boxPos(d,anchor){
+ const k=d<5?0:(d<10?1:2), off=d-k*5;
+ const str=CHAIN[anchor.str][k];
+ return {row:STROW[str],fret:anchor.R+off,str:str};
+}
+function parseProg(text,key){
+ if(!key)return [];
+ const kr=root(key),minor=key.endsWith('m'),tab=minor?MIN_DEG:MAJ_DEG;
+ if(!(kr in IDX))return [];
+ const out=[];
+ text.replace(RE,(m,r,q,sl,b,off,full)=>{
+  if(!okAt(m,off,full))return m;
+  const pc=IDX[r], d=((pc-IDX[kr])%12+12)%12;
+  const isMin=/^(m|min)(?!aj)/.test(q||'');
+  const prev=out[out.length-1];
+  if(prev&&prev.d===d&&prev.min===isMin)return m;
+  out.push({d:d,lab:tab[d],min:isMin,tonic:(d===0)});
+  return m});
+ return out;
+}
+function diagramSVG(text,key){
+ if(!key)return '';
+ const kr=root(key);if(!(kr in IDX))return '';
+ const pts=parseProg(text,key);
+ if(pts.length<2)return '';
+ const minor=key.endsWith('m'),tab=minor?MIN_DEG:MAJ_DEG;
+ const anchor=rootAnchor(IDX[kr]);
+ const cap=14,more=pts.length>cap,list=pts.slice(0,cap);
+ const uid=(diagramSVG._n=(diagramSVG._n||0)+1);
+ const a=Math.max(0,anchor.R-1), b=anchor.R+5;
+ const PL=26,PT=22,RH=25,FW=36,ROWS=4;
+ const W=PL+(b-a+1)*FW+10, H=PT+(ROWS-1)*RH+36;
+ const x=f=>PL+(f-a+0.5)*FW, y=r=>PT+r*RH;
+ let g='';
+ for(let f=a;f<=b+1;f++){const xx=PL+(f-a)*FW;
+  g+='<line x1="'+xx+'" y1="'+y(0)+'" x2="'+xx+'" y2="'+y(ROWS-1)+'" stroke="var(--line-2)" stroke-width="'+(f===0?3:1)+'"/>'}
+ const NAMES=['G','D','A','E'];
+ for(let r=0;r<ROWS;r++){
+  g+='<line x1="'+PL+'" y1="'+y(r)+'" x2="'+(PL+(b-a+1)*FW)+'" y2="'+y(r)+'" stroke="var(--line-2)" stroke-width="1.3"/>'+
+     '<text x="'+(PL-7)+'" y="'+(y(r)+4)+'" text-anchor="end" font-size="10" font-family="var(--mono)" fill="var(--muted)">'+NAMES[r]+'</text>'}
+ for(let f=a;f<=b;f++){const mk=(f===3||f===5||f===7||f===9||f===12);
+  g+='<text x="'+x(f)+'" y="'+(H-14)+'" text-anchor="middle" font-size="10" font-family="var(--mono)" fill="var(--muted)" opacity="'+(mk?'1':'.5')+'">'+f+'</text>'}
+ /* กล่องจาง: ทุกดีกรีในคีย์ */
+ const dia=minor?[0,2,3,5,7,8,10]:[0,2,4,5,7,9,11];
+ dia.forEach(d=>{const p=boxPos(d,anchor);
+  g+='<circle cx="'+x(p.fret)+'" cy="'+y(p.row)+'" r="8.5" fill="none" stroke="var(--line-2)" stroke-width="1" stroke-dasharray="2 2"/>'+
+     '<text x="'+x(p.fret)+'" y="'+(y(p.row)+3.4)+'" text-anchor="middle" font-size="9.5" font-family="var(--mono)" fill="var(--muted)" opacity=".7">'+tab[d]+'</text>'});
+ /* เส้นทางจริง: ลูกศรโค้งแยกเส้น ไม่ทับกัน */
+ const seen={};let arcs='';
+ for(let i=0;i<list.length-1;i++){
+  const p1=boxPos(list[i].d,anchor),p2=boxPos(list[i+1].d,anchor);
+  const x1=x(p1.fret),y1=y(p1.row),x2=x(p2.fret),y2=y(p2.row);
+  if(x1===x2&&y1===y2)continue;
+  const pk=Math.min(list[i].d,list[i+1].d)+'-'+Math.max(list[i].d,list[i+1].d);
+  const rp=seen[pk]=(seen[pk]||0)+1;
+  const dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy);
+  const side=(dx>0||(dx===0&&dy<0))?-1:1;
+  const bow=(17+11*(rp-1))*side;
+  const nx=-dy/len,ny=dx/len;
+  const cx=(x1+x2)/2+nx*bow, cy=(y1+y2)/2+ny*bow;
+  const t=13/len;
+  const sx=x1+(cx-x1)*t*1.5, sy=y1+(cy-y1)*t*1.5;
+  const ex=x2+(cx-x2)*t*1.8, ey=y2+(cy-y2)*t*1.8;
+  const op=(0.4+0.55*(i/Math.max(1,list.length-2))).toFixed(2);
+  arcs+='<path d="M'+sx.toFixed(1)+' '+sy.toFixed(1)+' Q'+cx.toFixed(1)+' '+cy.toFixed(1)+' '+
+    ex.toFixed(1)+' '+ey.toFixed(1)+'" fill="none" stroke="var(--navy)" stroke-width="1.9" '+
+    'opacity="'+op+'" marker-end="url(#ah'+uid+')"/>';
+ }
+ g+='<defs><marker id="ah'+uid+'" viewBox="0 0 8 8" refX="6.5" refY="4" markerWidth="5" '+
+    'markerHeight="5" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="var(--navy)"/></marker></defs>'+arcs;
+ list.forEach((pt,i)=>{const p=boxPos(pt.d,anchor),cx=x(p.fret),cy=y(p.row);
+  const col=pt.tonic?'var(--gold)':'var(--navy)';
+  g+='<circle cx="'+cx+'" cy="'+cy+'" r="12" fill="var(--surface)" opacity=".95"/>'+
+     '<circle cx="'+cx+'" cy="'+cy+'" r="10" fill="'+(pt.min?'var(--surface)':col)+'" stroke="'+col+'" stroke-width="2"/>'+
+     '<text x="'+cx+'" y="'+(cy+3.6)+'" text-anchor="middle" font-size="10" font-weight="700" font-family="var(--mono)" fill="'+(pt.min?col:'#fff')+'">'+pt.lab+(pt.min?'m':'')+'</text>'+
+     '<circle cx="'+(cx+9.5)+'" cy="'+(cy-9.5)+'" r="7" fill="var(--surface)" stroke="'+col+'" stroke-width="1.3"/>'+
+     '<text x="'+(cx+9.5)+'" y="'+(cy-6.6)+'" text-anchor="middle" font-size="8.5" font-weight="700" font-family="var(--mono)" fill="'+col+'">'+(i+1)+'</text>'});
+ if(more)g+='<text x="'+(W-14)+'" y="'+y(2)+'" font-size="13" fill="var(--muted)">\u2026</text>';
+ let flow='<div class="flow">'+list.map((pt,i)=>'<span class="fchip'+(pt.tonic?' tonic':'')+(pt.min?' min':'')+'">'+'<span class="i">'+(i+1)+'</span>'+pt.lab+(pt.min?'m':'')+'</span>').join('<span class="farrow">\u2192</span>')+(more?'<span class="farrow">\u2026</span>':'')+'</div>';
+ return flow+'<div class="dia"><svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" xmlns="http://www.w3.org/2000/svg" role="img">'+g+'</svg></div>';
+}
+
 const LS='bandpor.v2';let store={};
 try{store=JSON.parse(localStorage.getItem(LS)||'{}')}catch(e){}
 function save(){try{localStorage.setItem(LS,JSON.stringify(store))}catch(e){}}
 function G(i){return store['s'+i]||(store['s'+i]={})}
 
 const listEl=document.getElementById('list'),t1=document.getElementById('t1'),t2=document.getElementById('t2');
-let f1='all',f2='all',showDeg=false;
-try{showDeg=localStorage.getItem('bandpor.deg')==='1'}catch(e){}
+let f1='all',f2='all',showDeg=false,showDia=false;
+try{showDeg=localStorage.getItem('bandpor.deg')==='1';
+    showDia=localStorage.getItem('bandpor.dia')==='1'}catch(e){}
 function keyOpt(sel,v){sel.innerHTML='<option value="">—</option>'+
  KEYLIST.map(k=>'<option value="'+k+'"'+(k===v?' selected':'')+'>'+k+'</option>').join('')}
 function chartHTML(song,semi,flats,tgtKey){
@@ -409,11 +515,15 @@ function chartHTML(song,semi,flats,tgtKey){
  const rows=song.prog.map(p=>{
   const ch=tp(p[1],semi,flats);
   const dg=showDeg?degOf(p[1],song.key):'';
+  const dia=showDia?diagramSVG(p[1],song.key):'';
   return '<div class="crow"><div class="clabel">'+(p[0]||'&nbsp;')+'</div>'+
    '<div class="cstack"><div class="cchord">'+ch+'</div>'+
-   (dg?'<div class="cdeg">'+dg+'</div>':'')+'</div></div>';
+   (dg?'<div class="cdeg">'+dg+'</div>':'')+dia+'</div></div>';
  }).join('');
- return '<div class="chart">'+(showDeg?keyMap(tgtKey,flats):'')+rows+'</div>'}
+ return '<div class="chart">'+((showDeg||showDia)?keyMap(tgtKey,flats):'')+rows+'</div>'+
+  (showDia?'<div class="dia-legend">วงจาง = กล่องดีกรีของคีย์นี้ (รูปทรงเดิมทุกเพลง) &nbsp;\u00b7&nbsp; '+
+  'วงเข้ม = คอร์ดที่ใช้จริง เลขเล็กด้านบนคือลำดับ &nbsp;\u00b7&nbsp; วงทึบ = เมเจอร์ / วงกลวง = ไมเนอร์ &nbsp;\u00b7&nbsp; '+
+  '<span style="color:var(--gold)">สีทอง</span> = คอร์ดหลัก</div>':'')}
 
 function render(){
  t1.innerHTML='<button data-f="all" aria-selected="'+(f1==='all')+'">ทั้งหมด</button>'+
@@ -545,6 +655,13 @@ function syncDeg(){degBtn.classList.toggle('btn-primary',showDeg);
 degBtn.onclick=()=>{showDeg=!showDeg;try{localStorage.setItem('bandpor.deg',showDeg?'1':'0')}catch(e){}
  syncDeg();render();if(stage.classList.contains('on'))paint()};
 syncDeg();
+
+const diaBtn=document.getElementById('diaBtn');
+function syncDia(){diaBtn.classList.toggle('btn-primary',showDia);
+ diaBtn.textContent=showDia?'คอเบส ✓':'คอเบส'}
+diaBtn.onclick=()=>{showDia=!showDia;try{localStorage.setItem('bandpor.dia',showDia?'1':'0')}catch(e){}
+ syncDia();render();if(stage.classList.contains('on'))paint()};
+syncDia();
 
 document.getElementById('themeBtn').onclick=()=>{
  const c=document.documentElement.getAttribute('data-theme'),n=c==='dark'?'light':'dark';
