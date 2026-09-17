@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>คอนเสิร์ตมุทิตาจิต — วง "ป."</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&family=Noto+Serif+Thai:wght@600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#faf9f6; --surface:#fff; --sunken:#f3f1ec; --line:#e4e0d6; --line-2:#d3cec1;
+  --text:#191b1f; --muted:#6f6b63; --navy:#1f3a5f; --gold:#a8813a; --gold-soft:#f5edda;
+  --ok:#2f7d5d; --shadow:0 1px 2px rgba(20,20,20,.05),0 4px 14px rgba(20,20,20,.04);
+  --r:12px; --sans:"Noto Sans Thai",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --serif:"Noto Serif Thai",Georgia,serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --bg:#0f1216; --surface:#171b21; --sunken:#1e232a; --line:#2a3038; --line-2:#39414c;
+  --text:#eceae5; --muted:#9a968e; --navy:#8fb4dd; --gold:#d7b06a; --gold-soft:#2a2418;
+  --ok:#6ec79b; --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25)}}
+:root[data-theme=dark]{
+  --bg:#0f1216; --surface:#171b21; --sunken:#1e232a; --line:#2a3038; --line-2:#39414c;
+  --text:#eceae5; --muted:#9a968e; --navy:#8fb4dd; --gold:#d7b06a; --gold-soft:#2a2418;
+  --ok:#6ec79b; --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25)}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.65;overflow-x:hidden}
+.wrap{max-width:900px;margin:0 auto;padding:20px 16px 104px}
+
+/* ---------- header ---------- */
+.banner{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--shadow);overflow:hidden;margin-bottom:18px}
+.banner-top{height:3px;background:linear-gradient(90deg,var(--gold),var(--navy))}
+.banner-in{padding:20px 22px}
+.eyebrow{font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);
+  font-weight:700;margin:0 0 6px}
+.honoree{font-family:var(--serif);font-size:1.45rem;line-height:1.35;margin:0;font-weight:700}
+.role{color:var(--muted);font-size:.86rem;margin:4px 0 0;line-height:1.6}
+.banner-meta{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;padding-top:14px;
+  border-top:1px solid var(--line);font-size:.82rem;color:var(--muted)}
+.banner-meta div{display:flex;gap:6px;align-items:baseline}
+.banner-meta b{color:var(--text);font-weight:600}
+
+/* ---------- buttons ---------- */
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.btn{font-family:inherit;font-size:.85rem;font-weight:500;cursor:pointer;border-radius:9px;
+  border:1px solid var(--line-2);background:var(--surface);color:var(--text);padding:0 14px;
+  height:40px;display:inline-flex;align-items:center;gap:7px;text-decoration:none;
+  transition:border-color .15s,background .15s;white-space:nowrap}
+.btn:hover{border-color:var(--navy)}
+.btn-primary{background:var(--navy);border-color:var(--navy);color:#fff}
+.btn-primary:hover{filter:brightness(1.1)}
+.btn-icon{padding:0;width:40px;justify-content:center}
+.btn-sm{height:34px;font-size:.8rem;padding:0 11px}
+
+/* ---------- schedule ---------- */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--shadow);padding:16px 18px;margin-bottom:18px}
+.panel h2{font-family:var(--serif);font-size:.98rem;margin:0 0 12px;font-weight:700}
+.sched{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px}
+.slot{border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:var(--sunken)}
+.slot .n{font-size:.7rem;color:var(--muted);letter-spacing:.04em}
+.slot .d{font-family:var(--mono);font-weight:700;font-size:.9rem;margin-top:2px}
+.slot.show{background:var(--gold-soft);border-color:var(--gold)}
+.slot.show .d{color:var(--gold)}
+.venue{margin-top:12px;font-size:.8rem;color:var(--muted)}
+
+/* ---------- filters ---------- */
+.filters{margin-bottom:6px}
+.frow{display:flex;gap:10px;align-items:center;margin-bottom:9px;flex-wrap:wrap}
+.flabel{font-size:.74rem;color:var(--muted);font-weight:600;min-width:52px}
+.seg{display:flex;gap:4px;overflow-x:auto;padding:2px;background:var(--sunken);
+  border-radius:10px;border:1px solid var(--line);-webkit-overflow-scrolling:touch;
+  scrollbar-width:none}
+.seg::-webkit-scrollbar{display:none}
+.seg button{font-family:inherit;font-size:.8rem;font-weight:500;border:0;background:transparent;
+  color:var(--muted);padding:7px 13px;border-radius:8px;cursor:pointer;white-space:nowrap;
+  transition:.15s}
+.seg button:hover{color:var(--text)}
+.seg button[aria-selected=true]{background:var(--surface);color:var(--text);
+  box-shadow:0 1px 3px rgba(0,0,0,.08);font-weight:600}
+
+/* ---------- section + card ---------- */
+.sec{display:flex;align-items:baseline;gap:10px;margin:26px 0 12px;flex-wrap:wrap}
+.sec h3{font-family:var(--serif);font-size:1.02rem;margin:0;font-weight:700}
+.sec span{font-size:.75rem;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  margin-bottom:9px;box-shadow:var(--shadow);overflow:hidden;transition:border-color .15s}
+.card.open{border-color:var(--line-2)}
+.head{display:flex;gap:13px;align-items:center;padding:14px 16px;cursor:pointer;user-select:none}
+.head:hover{background:var(--sunken)}
+.no{flex:0 0 28px;height:28px;border-radius:50%;background:var(--sunken);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.76rem;
+  font-weight:700;color:var(--muted)}
+.card.done .no{background:var(--ok);border-color:var(--ok);color:#fff}
+.info{flex:1;min-width:0}
+.title{font-weight:600;font-size:1.01rem;line-height:1.4}
+.by{color:var(--muted);font-size:.79rem;margin-top:1px}
+.singer{display:inline-flex;align-items:center;gap:5px;font-size:.75rem;color:var(--gold);
+  font-weight:600;margin-top:4px}
+.singer::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--gold)}
+.keytag{flex:0 0 auto;font-family:var(--mono);font-size:.78rem;font-weight:700;color:var(--navy);
+  background:var(--gold-soft);border:1px solid var(--gold);padding:4px 9px;border-radius:7px}
+.chev{flex:0 0 auto;color:var(--muted);font-size:.8rem;transition:transform .2s}
+.card.open .chev{transform:rotate(180deg)}
+.body{display:none;padding:2px 16px 18px;border-top:1px solid var(--line)}
+.card.open .body{display:block}
+.actions{display:flex;gap:7px;flex-wrap:wrap;margin:14px 0}
+
+/* ---------- key + chords ---------- */
+.keys{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin:14px 0}
+.field label{display:block;font-size:.73rem;color:var(--muted);font-weight:600;margin-bottom:5px}
+select,input[type=text]{width:100%;font-family:inherit;font-size:.9rem;padding:9px 11px;
+  border:1px solid var(--line-2);border-radius:9px;background:var(--bg);color:var(--text);height:40px}
+.capo{background:var(--sunken);border:1px solid var(--line);border-left:3px solid var(--navy);
+  border-radius:8px;padding:10px 13px;font-size:.82rem;color:var(--muted);margin-bottom:6px}
+.capo b{color:var(--text);font-family:var(--mono);font-weight:700}
+.info-note{background:var(--gold-soft);border:1px solid var(--gold);border-radius:8px;
+  padding:9px 12px;font-size:.79rem;color:var(--text);margin:12px 0}
+.chart{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:14px}
+.crow{display:flex;gap:0;border-bottom:1px solid var(--line)}
+.crow:last-child{border-bottom:0}
+.crow:nth-child(odd){background:var(--sunken)}
+.clabel{flex:0 0 110px;padding:9px 12px;font-size:.74rem;color:var(--muted);font-weight:600;
+  text-align:right;border-right:1px solid var(--line)}
+.cchord{flex:1;min-width:0;padding:9px 13px;font-family:var(--mono);font-size:.84rem;font-weight:700;
+  color:var(--navy);white-space:pre-wrap;word-break:break-word;letter-spacing:.01em}
+.empty{color:var(--muted);font-size:.82rem;padding:14px;text-align:center}
+.checkrow{display:flex;align-items:center;gap:9px;font-size:.83rem;color:var(--muted);margin-top:14px}
+.checkrow input{width:18px;height:18px;accent-color:var(--ok)}
+
+/* ---------- stage ---------- */
+#stage{position:fixed;inset:0;background:var(--bg);z-index:200;display:none;flex-direction:column}
+#stage.on{display:flex}
+#sbar{display:flex;align-items:center;gap:6px;padding:9px 12px;background:var(--surface);
+  border-bottom:1px solid var(--line);flex-wrap:wrap}
+#sbar .grp{display:flex;gap:4px;align-items:center;background:var(--sunken);border:1px solid var(--line);
+  border-radius:9px;padding:3px}
+#sbar .grp .btn{height:30px;border:0;background:transparent;padding:0 9px;font-size:.8rem}
+#sbar .grp .btn:hover{background:var(--surface)}
+#stitle{flex:1 1 150px;font-family:var(--serif);font-weight:700;font-size:.93rem;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#skey{font-family:var(--mono);font-weight:700;color:var(--navy);background:var(--gold-soft);
+  border:1px solid var(--gold);padding:5px 10px;border-radius:7px;font-size:.8rem;min-width:52px;
+  text-align:center}
+#speed{width:88px;accent-color:var(--navy)}
+#sbody{flex:1;overflow-y:auto;padding:20px 18px 55vh}
+#sbody .chart{max-width:760px;margin:0 auto}
+#sbody .clabel{flex:0 0 120px;font-size:.85em}
+#sbody .cchord{font-size:1em;line-height:1.9}
+#sbody .info-note{max-width:760px;margin:0 auto 14px}
+
+/* ---------- metronome ---------- */
+#metro{position:fixed;left:0;right:0;bottom:0;z-index:220;background:var(--surface);
+  border-top:1px solid var(--line-2);box-shadow:0 -4px 20px rgba(0,0,0,.08);
+  transform:translateY(110%);transition:transform .22s ease}
+#metro.on{transform:none}
+.metro-in{max-width:900px;margin:0 auto;padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+  display:flex;align-items:center;gap:12px}
+.metro-label{font-size:.75rem;color:var(--muted);font-weight:600;letter-spacing:.04em}
+.beat{width:11px;height:11px;border-radius:50%;background:var(--line-2);flex:0 0 auto;
+  transition:transform .06s,background .06s}
+.beat.hit{background:var(--gold);transform:scale(1.55)}
+#bpm{flex:1;min-width:70px;accent-color:var(--navy)}
+.bpmv{font-family:var(--mono);font-weight:700;font-size:.85rem;min-width:66px;text-align:right}
+.bpmv span{font-family:var(--sans);font-weight:400;font-size:.7rem;color:var(--muted)}
+
+footer{margin-top:30px;padding-top:16px;border-top:1px solid var(--line);
+  font-size:.74rem;color:var(--muted);text-align:center;line-height:1.9}
+@media(max-width:700px){
+  .wrap{padding:14px 12px 112px}
+
+  /* หัวงาน */
+  .banner-in{padding:16px 16px}
+  .honoree{font-size:1.2rem;line-height:1.4}
+  .role{font-size:.8rem}
+  .banner-meta{gap:6px 16px;margin-top:12px;padding-top:12px;font-size:.78rem}
+
+  /* ปุ่มบนสุด — เต็มความกว้าง แตะง่าย */
+  .toolbar{gap:7px}
+  .toolbar .btn{flex:1 1 auto;justify-content:center;min-height:44px;font-size:.84rem;padding:0 10px}
+  .toolbar .btn-icon{flex:0 0 44px;width:44px}
+
+  /* ตารางซ้อม */
+  .panel{padding:14px}
+  .sched{grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px}
+  .slot{padding:8px 9px}
+  .slot .n{font-size:.66rem}
+  .slot .d{font-size:.84rem}
+
+  /* ตัวกรอง — ป้ายอยู่บรรทัดบน */
+  .frow{flex-direction:column;align-items:stretch;gap:5px;margin-bottom:11px}
+  .flabel{min-width:0}
+  .seg button{padding:9px 14px;font-size:.82rem}
+
+  /* การ์ดเพลง */
+  .head{padding:13px 13px;gap:10px;min-height:60px}
+  .title{font-size:.98rem}
+  .by{font-size:.76rem}
+  .singer{font-size:.73rem}
+  .keytag{font-size:.74rem;padding:3px 7px}
+  .no{flex:0 0 26px;height:26px;font-size:.72rem}
+  .body{padding:2px 13px 16px}
+  .actions .btn{flex:1 1 calc(50% - 4px);justify-content:center;min-height:42px}
+
+  /* คอร์ด — ชื่อท่อนอยู่บน คอร์ดได้ความกว้างเต็ม */
+  .crow{flex-direction:column;gap:0}
+  .clabel{flex:none;text-align:left;border-right:0;border-bottom:1px dashed var(--line);
+    padding:8px 12px 5px;font-size:.72rem;letter-spacing:.03em}
+  .cchord{padding:7px 12px 10px;font-size:.9rem;line-height:1.85}
+
+  /* เมโทรนอม */
+  .metro-in{flex-wrap:wrap;gap:9px;padding:11px 13px calc(11px + env(safe-area-inset-bottom))}
+  .metro-label{display:none}
+  #bpm{flex:1 1 100%;order:3;height:26px}
+  .bpmv{min-width:60px;font-size:.82rem}
+  #play{min-width:64px}
+
+  /* โหมดซ้อม — ชื่อเพลงบรรทัดเดียวเต็ม แล้วปุ่มอยู่แถวล่าง */
+  #sbar{gap:6px;padding:9px 10px calc(9px + env(safe-area-inset-top,0px))}
+  #stitle{flex:1 1 100%;order:-1;font-size:.9rem;white-space:normal;line-height:1.4}
+  #sbar .btn,#sbar .grp .btn{min-height:40px}
+  #sbar .grp .btn{padding:0 12px;font-size:.92rem}
+  #speed{flex:1 1 auto;width:auto;min-width:70px}
+  #sbody{padding:16px 12px 60vh}
+  #sbody .clabel{flex:none;font-size:.78em}
+  #sbody .cchord{font-size:1.02em;line-height:1.95}
+}
+@media(max-width:400px){
+  .honoree{font-size:1.1rem}
+  .banner-meta{flex-direction:column;gap:5px}
+  .sched{grid-template-columns:1fr 1fr}
+  .keys{grid-template-columns:1fr;gap:9px}
+  .actions .btn{flex:1 1 100%}
+  #sbar .btn-sm{font-size:.76rem;padding:0 9px}
+  #speed{flex:1 1 100%;order:5}
+}
+@media print{
+  .toolbar,.filters,#metro,#stage,.actions,footer,.chev,.checkrow{display:none!important}
+  .body{display:block!important}
+  body{background:#fff;color:#000}
+  .cchord{color:#000}
+  .card{break-inside:avoid;box-shadow:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="banner">
+  <div class="banner-top"></div>
+  <div class="banner-in">
+    <p class="eyebrow">คอนเสิร์ตมุทิตาจิต</p>
+    <h1 class="honoree">พล.อ.ต. นพ. อิทธพร คณะเจริญ</h1>
+    <p class="role">เลขาธิการแพทยสภา · เลขาธิการมูลนิธิธรรมาภิบาลทางการแพทย์</p>
+    <div class="banner-meta">
+      <div><span>บรรเลงโดย</span> <b>วง "ป."</b></div>
+      <div><span>วันแสดง</span> <b>26 ตุลาคม</b></div>
+      <div><span>รายการเพลง</span> <b>16 เพลง · 4 ช่วง</b></div>
+    </div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <button class="btn btn-primary" id="stageBtn">โหมดซ้อม</button>
+  <button class="btn" id="metroBtn">เมโทรนอม</button>
+  <button class="btn" onclick="window.print()">พิมพ์</button>
+  <button class="btn btn-icon" id="themeBtn" title="สลับธีม">◐</button>
+</div>
+
+<div class="panel">
+  <h2>ตารางซ้อม</h2>
+  <div class="sched">
+    <div class="slot"><div class="n">ครั้งที่ 1</div><div class="d">20 ก.ย.</div></div>
+    <div class="slot"><div class="n">ครั้งที่ 2</div><div class="d">27 ก.ย.</div></div>
+    <div class="slot"><div class="n">ครั้งที่ 3</div><div class="d">4 ต.ค.</div></div>
+    <div class="slot"><div class="n">ครั้งที่ 4</div><div class="d">23 ต.ค.</div></div>
+    <div class="slot"><div class="n">สำรอง</div><div class="d">24 ต.ค.</div></div>
+    <div class="slot"><div class="n">ครั้งที่ 5</div><div class="d">25 ต.ค.</div></div>
+    <div class="slot show"><div class="n">วันแสดง</div><div class="d">26 ต.ค.</div></div>
+  </div>
+  <div class="venue">ซ้อมเวลา 18.00 น. ที่บ้านพี่นัท ถนนสุโขทัย ซอย 7</div>
+</div>
+
+<div class="filters">
+  <div class="frow"><div class="flabel">ช่วง</div><div class="seg" id="t1"></div></div>
+  <div class="frow"><div class="flabel">นักร้อง</div><div class="seg" id="t2"></div></div>
+</div>
+
+<div id="list"></div>
+
+<footer>
+  จัดทำเพื่อใช้ซ้อมภายในวง · ทางเดินคอร์ดอ้างอิงจากแผ่นคอร์ดที่วงใช้
+</footer>
+</div>
+
+<div id="stage">
+  <div id="sbar">
+    <div class="grp"><button class="btn" id="sPrev">‹</button><button class="btn" id="sNext">›</button></div>
+    <div id="stitle"></div>
+    <div class="grp"><button class="btn" id="sDown">♭</button><div id="skey">—</div><button class="btn" id="sUp">♯</button></div>
+    <button class="btn btn-sm" id="sFont">ก+</button>
+    <button class="btn btn-sm" id="sScroll">เลื่อน</button>
+    <input type="range" id="speed" min="1" max="20" value="6" title="ความเร็วเลื่อน">
+    <button class="btn btn-sm" id="sMetro">เมโทรนอม</button>
+    <button class="btn btn-icon btn-sm" id="sClose">✕</button>
+  </div>
+  <div id="sbody"></div>
+</div>
+
+<div id="metro">
+  <div class="metro-in">
+    <div class="metro-label">เมโทรนอม</div>
+    <div class="beat" id="beat"></div>
+    <button class="btn btn-primary btn-sm" id="play" style="min-width:68px;justify-content:center">เริ่ม</button>
+    <input type="range" id="bpm" min="40" max="200" value="90">
+    <div class="bpmv"><span id="bpmv">90</span> <span>BPM</span></div>
+    <button class="btn btn-icon btn-sm" id="mClose">✕</button>
+  </div>
+</div>
+
+<script>
+const SONGS=[{"sec": "s1", "t": "ใจรัก", "a": "สุชาติ ชวางกูร", "lead": "อ.เจน · คอรัส อ.กิติมา", "grp": "jane", "key": "D", "bpm": 86, "src": "chart", "c": "https://www.dochord.com/29461/", "y": "https://www.youtube.com/watch?v=PpFAN32dU-8", "prog": [["INTRO", "| D | Dmaj7  D7 | G | G |  F#m  Bm | Em  A | D | A |"], ["Verse", "| D  Dmaj7 | D7  G | F#m | Bm  Em | A  D | A |"], ["*", "| A  A7 | D |  A  A7 | D  A |"], ["INSTRU", "| D | Dmaj7  D7 | G | G |  F#m  Bm | Em  A | D | D |"], ["Ending", "| D  Dmaj7 | D7  G | F#m | Bm  Em | A  D |"]]}, {"sec": "s1", "t": "ฤดูที่แตกต่าง", "a": "บอย โกสิยพงษ์ feat. นภ พรชำนิ", "lead": "อ.มะเดื่อ", "grp": "madua", "key": "A", "bpm": 72, "src": "chart", "note": "แผ่นของวงเป็นคีย์ A — ต้นฉบับที่อัดจริงเป็น Bb (สูงกว่าครึ่งเสียง)", "c": "https://www.dochord.com/44446/", "y": "https://www.youtube.com/watch?v=iHsmotTnh5I", "prog": [["INSTRU", "| A  C#m | F#m | Bm | E |  A  C#m | F#m | Bm  C#m | D  E |"], ["Verse", "| A  C#m | D  E |  A  C#m | D  E |"], ["Pre", "| F#m  Faug | E | B | D |  C#m | Bm  E |"], ["*", "| A | F#m | Bm  E | A | F#m | Bm | E | A |"], ["INSTRU", "| A  C#m | F#m |  Bm  C#m | D  E |"], ["Bridge", "| Bm  E  A | D  C#m  F#m | B7 | E |"], ["INSTRU", "| A | F#m  F#7 | Bm | E |   (2 Times)"], ["Outro", "| A  C#m | F#m | Bm | E |  A  C#m | F#m | Bm  C#m | D |"]]}, {"sec": "s2", "t": "รางวัลแด่คนช่างฝัน", "a": "จรัล มโนเพ็ชร", "lead": "อ.เจน · ร่วม อ.กิติมา", "grp": "jane", "key": "F", "bpm": 76, "src": "chart", "c": "https://www.dochord.com/11937/", "y": "https://www.youtube.com/watch?v=td2B9agcy1M", "prog": [["INTRO", "| Bb | F | C | C |"], ["Verse", "| F  Gm | Am  Gm |  F  Gm | Am |  Bb  C | A7  Dm |  Gm | C |"], ["*", "| F  Gm | Am  Gm |  F  Gm | Am |  Bb  C | A7  Dm |  Gm  C | F  (F7) |"], ["**", "| Bb  F | A7  Dm |  Bb  Am | Gm  C |"], ["***", "| F  Gm | Am  Gm |  F  Gm | Am |  Bb  C | A7  Dm |  Gm  C | F  F7 |"], ["INSTRU", "| F  Gm | Am  Gm |  F  Gm | Am |  Bb  C | A7  Dm |  Gm | C | F | F7 |"], ["", "ซ้ำ ** , *** , *"]]}, {"sec": "s2", "t": "หนึ่งในร้อย", "a": "เบิร์ด ธงไชย", "lead": "อ.กิติมา", "grp": "kitima", "key": "C", "bpm": 74, "src": "chart", "c": "https://chordtabs.in.th/23373/", "y": "https://www.youtube.com/watch?v=pD2T3VfczD0", "prog": [["Intro", "| Cmaj7 | Cmaj7 | Dm | G |   (2 Times)"], ["Verse", "| Cmaj7 | Dm  G |  Cmaj7 | Dm  G |"], ["*", "| F  Em | Dm  Em |  F  Em | Dm |  F  Em | Dm  Em | Asus4 | A |"], ["**", "| Dm  G | Cmaj7 |  Dm  G | Em  C7 |  Dm  G | E/G#  G  D/F# |  Dm  G | (C  C7) |"], ["Instru 1", "| Cmaj7 | Cmaj7 | Dm | G |"], ["Instru 2", "| F | Em | Dm | Cmaj7 |  F  Em | Dm  Em | Asus4 | A |"], ["Ending", "| C  Dm | G |  C  Dm | G | C |"]]}, {"sec": "s2", "t": "ยิ่งรู้จักยิ่งรักเธอ", "a": "ดา เอ็นโดรฟิน", "lead": "Guest — พี่อุ๊ พี่อร พี่แมวสาว", "grp": "guest", "key": "E", "bpm": 78, "src": "chart", "note": "ตั้งสายต่ำลงครึ่งเสียง (เสียงจริง = Eb) · ท่อนท้ายโมดูเลตขึ้นครึ่งเสียง", "c": "https://www.dochord.com/101700/", "y": "https://www.youtube.com/watch?v=v5wvIGxvdLI", "prog": [["INTRO", "| E | E | C#m | C#m |  F#m | F#m | B | B |"], ["Verse", "| E | C#m | F#m | B |"], ["*", "| E | C#m | F#m | B |"], ["INSTRU 1", "| E | E | C#m | C#m |  F#m | F#m | B | B |"], ["INSTRU 2", "| A | B | G#m | C#m |  F#m | F#m | B | C |"], ["โมดูเลตขึ้นครึ่งเสียง", "| F | Dm | Gm | C |"], ["INSTRU 3", "| F | F | Dm | Dm |  Gm | Gm | C | C | F |"]]}, {"sec": "s2", "t": "สองเวลา", "a": "ศรัณย่า ส่งเสริมสวัสดิ์", "lead": "อ.กิติมา", "grp": "kitima", "key": "Eb", "bpm": 80, "src": "chart", "note": "คลิปอ้างอิง เพลงเริ่มหลังนาทีที่ 1", "c": "https://chordtabs.in.th/20485/", "y": "https://www.youtube.com/watch?v=WpRHmLPeAFs", "prog": [["Intro", "| Eb  Ab | Bb  Ab |   (4 Times)"], ["Verse", "| Eb  Ab | Bb  Ab |  Eb  Ab | Bb  Ab |  Eb  Ab | Bb  Ab |  Eb  Ab | Bb |"], ["Pre", "| Cm  Ab | Bb |  Cm  Ab | Bb |"], ["*", "| Eb  Ab | Bb  Ab |  Eb  Ab | Bb  Ab |  Eb  Ab | Bb  Ab |  Eb  Ab | Bb |"], ["Instru", "| Eb  Ab | Bb  Ab |   (2 Times)"], ["**", "| Cm  Ab | Bb |  Cm  Ab | Bb |"], ["Instru", "| Eb  Ab | Bb  Ab |   (4 Times)"], ["Ending", "| Eb  Ab | Bb  Ab | Eb |  Ab  Bb | Ab  Eb |"]]}, {"sec": "s2", "t": "มีเธอ", "a": "ปุ๊ อัญชลี จงคดีกิจ", "lead": "อ.เจน (ขอคีย์ผู้ชาย)", "grp": "jane", "key": "Bb", "bpm": 70, "src": "chart", "note": "ยืนยันแล้วว่าเป็นเวอร์ชันนี้ · เจนขอคีย์ผู้ชาย ให้เลือกคีย์ปลายทางในช่องด้านล่าง", "c": "https://www.dochord.com/233436/", "y": "https://www.youtube.com/watch?v=1Dj2Zb0esd8", "prog": [["INTRO", "| Bb  Gm | Dm  Cm |  Bb  Gm | F |"], ["Verse", "| Bb  Gm | Dm  Cm |  Bb  Gm | Dm  Cm  Dm |  Eb  Dm | D7  Gm  F |  C7 | F |"], ["**", "| Bb  Gm | Dm  Cm |  Bb  Gm | Dm  Cm  Dm |  Eb  Dm | D7  Gm  F |  Cm  F | Bb  (Fm  Bb) |"], ["*", "| Eb  Dm | Cm  F |  Bb  Fm  Bb |  Eb  Dm  G | Cm  F | Bb |"], ["INSTRU", "| Bb  Gm | Dm  Cm |  Bb  Gm | Dm  Cm  Dm |  Eb  Dm | D7  Gm  F |  Cm  F | Bb  Fm  Bb |"], ["Ending", "| Cm | Dm  Eb  Dm |  D7  Gm  F |  Cm  F | Bb |"]]}, {"sec": "s3", "t": "หยุด", "a": "Groove Riders", "lead": "อ.เจน", "grp": "jane", "key": "G", "bpm": 96, "src": "chart", "c": "https://www.guitarthai.com/chords/Song/3250/", "y": "https://www.youtube.com/watch?v=SZLr70YeyRo", "prog": [["INSTRU", "| Cmaj7 | Bm7 | Am7  D7 | Gmaj7 |   (3 Times)"], ["Verse", "| Cmaj7 | Bm7 | Am7  D7 | Gmaj7 |"], ["*", "| Em7  A7 | Em7  A7 |  Em7  A7 | D7 |"], ["**", "| Cmaj7 | Bm7 | Am7  D7 | Gmaj7 |   (2 รอบ)"], ["INSTRU", "| Cmaj7 | Bm7 | Am7  D7 | Gmaj7 |   (2 Times)"], ["INSTRU ท้าย", "| Em | A7 | Em | A7 |  Em | A7 | D7 | D7 |   แล้วซ้ำ ** จนจบ"]]}, {"sec": "s3", "t": "เชื่อฉัน", "a": "แกรนด์ เอ็กซ์ / แจ้ ดนุพล", "lead": "อ.เจน", "grp": "jane", "key": "D", "bpm": 112, "src": "chart", "c": "https://chordtabs.in.th/4378/", "y": "https://www.youtube.com/watch?v=0uHEp48s2dg", "prog": [["Intro", "| Gmaj7 | F#m | Em | D |   (2 Times)  | A | A |"], ["Verse", "| D  F#m | G  D |  G  F#m | E  A |  D  F#m | G |  G  F#m | E  A  D |"], ["*", "| Gmaj7  F#m | Em  D |  Gmaj7  F#m | E7  A |"], ["**", "| Gmaj7  F#m | Em  D |  Gmaj7  F#m | E  A  |  D  Dsus4  D |"], ["Instru", "| D | F#m | G | D | G | F#m | E7 | A |  D | F#m | G | D | G | F#m | E  A | D |"], ["Outro", "| G  A | D |"]]}, {"sec": "s3", "t": "หัวใจมีปีก", "a": "แกรนด์ เอ็กซ์", "lead": "Guest (ยังไม่ระบุตัว)", "grp": "guest", "key": "A", "bpm": 118, "src": "chart", "c": "https://chordtabs.in.th/12317/", "y": "https://www.youtube.com/watch?v=qSnWS1VMCnE", "prog": [["Intro", "| A | A7 | D | A |  A7 | D | A | A |"], ["Verse", "| A | D  D7 | G  G#dim7 | D  D7 |  G  G#dim7 | D | A |"], ["", "ท่อนร้องเดินแบบเดียวกันทุกท่อน ท่อนสุดท้ายจบ | G  G#dim7 | D | A  D |"], ["Instru", "| A | A |  A | A7 | D | A | A7 | D | A | A |  D | D |"], ["Ending", "| A  D | A  D | A  D |"]]}, {"sec": "s3", "t": "รักคือฝันไป", "a": "สาว สาว สาว", "lead": "Guest — พี่โป่ง พี่เจน ปธ8 ปลา ปน2 · ร่วม อ.กิติมา", "grp": "guest", "key": "Eb", "bpm": 120, "src": "chart", "c": "https://www.guitarthai.com/chords/Song/9575/", "y": "https://www.youtube.com/watch?v=24aKgHmi7HE", "prog": [["INTRO", "| Eb |   (4 Times)"], ["*", "| Eb | Cm | Bb | Eb |  Eb | Cm | Bb | Eb |"], ["**", "| Eb | Cm | Bb | Eb |  Eb | Cm | Bb | Eb |"], ["***", "| Gm | Cm |  Bb | Eb  Cm | Fm | Bb  Eb |"], ["INSTRU", "| Eb | Eb | Cm | Cm | Bb | Bb | Eb | Eb |   (2 Times)"], ["", "ซ้ำ *** , ** แล้ว INSTRU ชุดเดิม จนจบ"]]}, {"sec": "s3", "t": "มนต์ไทรโยค", "a": "The Innocent", "lead": "อ.มะเดื่อ · ร่วม อ.กิติมา", "grp": "madua", "key": "Ab", "bpm": 126, "src": "chart", "c": "https://chordtabs.in.th/13781/", "y": "https://www.youtube.com/watch?v=pTPQ0pl5f5o", "prog": [["Intro", "| Db  Eb | Db  Ab |  Cm  Fm | Bbm  Eb |"], ["Verse", "| Ab | Bbm | Db  Bbm | Eb | Ab  Eb |  Ab  F | Bbm | F  Db | Bbm | Eb  Ab |"], ["*", "| Eb | Ab | Db | Eb |  Ab  Db  Ab | Cm | Fm  Bbm | Db  Eb |  Ab  Db  Ab | Cm | Bbm  Eb | Ab |"], ["Instru 1", "| Ab | Cm | Db | Eb |"], ["Instru 2", "| Ab | Cm  Db | Eb  Ab | Cm  Db | Eb |  Cm | Fm  Db | Eb  Cm | Fm  Bbm | Eb  Ab |  Eb  Ab | Db  Eb |   (2 Times)"], ["Ending", "| Ab  Db  Ab | Cm | Fm  Bbm | Eb  Ab  F |  Bbm  Eb | Ab  F | Bbm  Eb |  Fm  Cm  Db | Eb  Ab |"]]}, {"sec": "s3", "t": "เพียงกระซิบ", "a": "Black Head", "lead": "Guest — พี่เต้ง", "grp": "guest", "key": "D", "bpm": 92, "src": "chart", "note": "ตั้งสาย Eb (ต่ำลงครึ่งเสียง) — เสียงจริงเป็น Db", "c": "https://www.guitarthai.com/chords/Song/39831/", "y": "https://www.youtube.com/watch?v=m9eV3Wokds4", "prog": [["INSTRU", "| D | F#m | Bm | G  A |   (2 Times)  | D |"], ["Verse", "| D  F#m | G  A  D |  G  A | F#m  Bm | Em  A |  D  F#m | G  A  D |  G  A | F#m  Bm | Em  A  D |"], ["*", "| Em  A | D | Bm  Em | A  D |  Em  A | D | Bm | G  A |"], ["**", "| D  F#m | G  A  D |  G  A | F#m  Bm  Em | A  D |"], ["INSTRU", "| D | F#m | Bm | G  A |   (2 Times)  | D |"], ["Ending", "| Em  A | D  Bm  Em  A |  D  Bm  Em  A | Bb  C  D |"]]}, {"sec": "s3", "t": "คนที่ถูกรัก", "a": "Bodyslam", "lead": "อ.เจน", "grp": "jane", "key": "A", "bpm": 128, "src": "chart", "note": "เวอร์ชันเต็มวงใช้ voicing Amaj7 · F#m9 · Bm7 · C#m7 · Dmaj7 · Eadd9", "c": "https://www.dochord.com/29150/", "y": "https://www.youtube.com/watch?v=7TVdbOakiRo", "prog": [["INTRO", "| E | A | E | A |  A | F#m | C#m | D |   (2 Times)"], ["Verse", "| A | F#m | Bm | D  A |  F#m | Bm | D  E |"], ["* / **", "| A | F#m | Bm | C#m  D | E |"], ["INSTRU", "| A | A | F#m | F#m |   (2 Times)  | A | F#m | C#m | D |   (2 Times)  | A |"]]}, {"sec": "s3", "t": "ขอใจแลกเบอร์โทร", "a": "หญิงลี ศรีจุมพล", "lead": "ทีม staff", "grp": "guest", "key": "C#m", "bpm": 130, "src": "chart", "c": "https://www.dochord.com/42328/", "y": "https://www.youtube.com/watch?v=CKDwsFbq1_c", "prog": [["INTRO", "| C#m | C#m | C#m | G#m  C#m |  C#m | C#m | A  B | C#m | C#m | C#m |"], ["Verse", "| C#m  A | B  C#m |  A  B | F#m |  B  C#m |  C#m  A | B | C#m |"], ["*", "| A  B |  G#m  C#m |  A  B |"], ["**", "| E  C#m | A  B |   (3 รอบ)  | E  C#m | A |  B  E  (C#m) |"], ["INSTRU 1", "| E | C#m | A | B |   (2 Times)  | E | E |"], ["INSTRU 2", "| C#m | C#m | A  B | C#m |  C#m | C#m | C#m | C#m |"]]}, {"sec": "s4", "t": "ความสุข ความทรงจำ ไม่มีที่สิ้นสุด", "a": "เบิร์ด ธงไชย", "lead": "อ.เจน + รวมศิลปิน · ร่วม อ.กิติมา", "grp": "jane", "key": "C", "bpm": 84, "src": "chart", "c": "https://www.guitarthai.com/chords/Song/4236/", "y": "https://www.youtube.com/watch?v=LeYqzc0MuOI", "prog": [["Intro", "| C  Dm | Am  A7 | F | G  C |"], ["Verse 1", "| C  Am | G |  F  G | C |  C  Dm | Am  Em | F | Dm  G |"], ["Verse 2", "| C  Am | G |  F  G | C |  C  Dm | Am  Em | F | G  C |"], ["*", "| F  G | Em  Am |  F  G | C |  F  G | Em  Am | F | G  C |"], ["**", "| C  Am | G |  F  G | C |  C  Dm | Am  Em | F | G  C |"], ["Ending", "| F | G | C |"]]}];
+const SECTIONS=[["s1", "ช่วงที่ 1 — Opening & Warm Welcome", "เปิดเวที อบอุ่น"], ["s2", "ช่วงที่ 2 — Tribute & Legacy", "มุทิตาจิต ซาบซึ้ง"], ["s3", "ช่วงที่ 3 — Celebration & Groove", "สนุก ปลดปล่อย"], ["s4", "Finale", "ปิดเวที"]];
+const GNAME={jane:'อ.เจน',madua:'อ.มะเดื่อ',kitima:'อ.กิติมา',guest:'Guest / staff'};
+
+const SH=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const FL=['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+const IDX={};SH.forEach((n,i)=>IDX[n]=i);FL.forEach((n,i)=>IDX[n]=i);
+IDX['E#']=5;IDX['B#']=0;IDX['Cb']=11;IDX['Fb']=4;
+const KEYLIST=['C','Db','D','Eb','E','F','F#','G','Ab','A','Bb','B','Cm','C#m','Dm','Ebm','Em','Fm','F#m','Gm','G#m','Am','Bbm','Bm'];
+const FLATKEY=new Set(['F','Bb','Eb','Ab','Db','Gb','Dm','Gm','Cm','Fm','Bbm','Ebm']);
+const RE=/([A-G](?:#|b)?)((?:maj|min|dim|aug|sus|add|m|M)?(?:13|11|9|7|6|5|4|2)?(?:sus[24]|add\d{1,2}|maj\d|dim|aug|\+)?(?:[#b](?:5|9|11|13))?)(\/([A-G](?:#|b)?))?/g;
+function root(k){return (k||'').replace(/m$/,'')}
+function sh(n,s,f){if(!(n in IDX))return n;return (f?FL:SH)[((IDX[n]+s)%12+12)%12]}
+function okAt(m,off,full){const p=off>0?full[off-1]:'',a=full[off+m.length]||'';
+ if(/[A-Za-z]/.test(p))return false;if(/[a-z]/.test(a)&&!/[0-9)\]]$/.test(m))return false;return true}
+function tp(t,semi,flats){return t.replace(RE,(m,r,q,sl,b,off,full)=>{
+ if(!okAt(m,off,full))return m;let o=sh(r,semi,flats)+(q||'');if(b)o+='/'+sh(b,semi,flats);return o})}
+function semis(a,b){a=root(a);b=root(b);if(!(a in IDX)||!(b in IDX))return 0;
+ let d=IDX[b]-IDX[a];if(d>6)d-=12;if(d<-6)d+=12;return d}
+function capoText(s){if(s===0)return 'เล่นคีย์เดิม ไม่ต้องใช้คาโป้';
+ if(s>0)return 'กีตาร์: จับคอร์ดคีย์เดิม แล้วคาโป้ช่อง <b>'+s+'</b>';
+ return 'กีตาร์: คาโป้ช่อง <b>'+(12+s)+'</b> หรือลดคอร์ดลง <b>'+Math.abs(s)+'</b> ขั้น'}
+
+const LS='bandpor.v2';let store={};
+try{store=JSON.parse(localStorage.getItem(LS)||'{}')}catch(e){}
+function save(){try{localStorage.setItem(LS,JSON.stringify(store))}catch(e){}}
+function G(i){return store['s'+i]||(store['s'+i]={})}
+
+const listEl=document.getElementById('list'),t1=document.getElementById('t1'),t2=document.getElementById('t2');
+let f1='all',f2='all';
+function keyOpt(sel,v){sel.innerHTML='<option value="">—</option>'+
+ KEYLIST.map(k=>'<option value="'+k+'"'+(k===v?' selected':'')+'>'+k+'</option>').join('')}
+function chartHTML(song,semi,flats){
+ if(!song.prog.length)return '<div class="empty">ยังไม่มีทางเดินคอร์ดของเพลงนี้</div>';
+ return '<div class="chart">'+song.prog.map(p=>
+  '<div class="crow"><div class="clabel">'+(p[0]||'&nbsp;')+'</div>'+
+  '<div class="cchord">'+tp(p[1],semi,flats)+'</div></div>').join('')+'</div>'}
+
+function render(){
+ t1.innerHTML='<button data-f="all" aria-selected="'+(f1==='all')+'">ทั้งหมด</button>'+
+  SECTIONS.map(s=>'<button data-f="'+s[0]+'" aria-selected="'+(f1===s[0])+'">'+s[1].split('—')[0].trim()+'</button>').join('');
+ t1.querySelectorAll('button').forEach(b=>b.onclick=()=>{f1=b.dataset.f;render()});
+ t2.innerHTML='<button data-g="all" aria-selected="'+(f2==='all')+'">ทุกคน</button>'+
+  Object.keys(GNAME).map(k=>'<button data-g="'+k+'" aria-selected="'+(f2===k)+'">'+GNAME[k]+'</button>').join('');
+ t2.querySelectorAll('button').forEach(b=>b.onclick=()=>{f2=b.dataset.g;render()});
+ listEl.innerHTML='';
+ SECTIONS.forEach(sec=>{
+  const songs=SONGS.filter(x=>x.sec===sec[0]&&(f2==='all'||x.grp===f2));
+  if((f1!=='all'&&f1!==sec[0])||!songs.length)return;
+  const h=document.createElement('div');h.className='sec';
+  const parts=sec[1].split('—');
+  h.innerHTML='<h3>'+parts[0].trim()+'</h3><span>'+(parts[1]?parts[1].trim()+' · ':'')+sec[2]+'</span>';
+  listEl.appendChild(h);
+  songs.forEach(sg=>listEl.appendChild(card(sg)));
+ });
+}
+
+function card(song){
+ const i=SONGS.indexOf(song),st=G(i),n=i+1;
+ const orig=st.orig!==undefined?st.orig:song.key;
+ const tgt=st.tgt!==undefined?st.tgt:song.key;
+ const el=document.createElement('div');el.className='card'+(st.done?' done':'');
+ el.innerHTML='<div class="head"><div class="no">'+(st.done?'✓':n)+'</div>'+
+  '<div class="info"><div class="title">'+song.t+'</div><div class="by">'+song.a+'</div>'+
+  '<div class="singer">'+song.lead+'</div></div>'+
+  '<div class="keytag">'+(tgt||orig||'?')+'</div><div class="chev">▾</div></div>'+
+  '<div class="body">'+
+   '<div class="actions"><button class="btn btn-primary btn-sm st">ซ้อมเพลงนี้</button>'+
+   '<a class="btn btn-sm" href="'+song.c+'" target="_blank" rel="noopener">เว็บคอร์ด</a>'+
+   '<a class="btn btn-sm" href="'+song.y+'" target="_blank" rel="noopener">ฟังต้นฉบับ</a>'+
+   '<button class="btn btn-sm mb">'+song.bpm+' BPM</button></div>'+
+   (song.note?'<div class="info-note">'+song.note+'</div>':'')+
+   '<div class="keys"><div class="field"><label>คีย์ของแผ่นคอร์ด</label><select class="fo"></select></div>'+
+   '<div class="field"><label>คีย์ที่วงเล่น</label><select class="ft"></select></div></div>'+
+   '<div class="capo fc"></div><div class="fp"></div>'+
+   '<div class="field" style="margin-top:14px"><label>โน้ตซ้อม / คิว</label>'+
+   '<input type="text" class="fn" placeholder="เช่น อินโทร 4 ห้อง / จบซ้ำฮุก 2 รอบ"></div>'+
+   '<label class="checkrow"><input type="checkbox" class="fd"> ซ้อมผ่านแล้ว</label></div>';
+ el.querySelector('.head').onclick=()=>el.classList.toggle('open');
+ const fo=el.querySelector('.fo'),ft=el.querySelector('.ft'),fc=el.querySelector('.fc'),
+       fp=el.querySelector('.fp'),fn=el.querySelector('.fn'),fd=el.querySelector('.fd');
+ keyOpt(fo,orig);keyOpt(ft,tgt);fn.value=st.note||'';fd.checked=!!st.done;
+ function up(){
+  st.orig=fo.value;st.tgt=ft.value;save();
+  el.querySelector('.keytag').textContent=ft.value||fo.value||'?';
+  const s=(fo.value&&ft.value)?semis(fo.value,ft.value):0;
+  const fl=FLATKEY.has(ft.value||fo.value||'C');
+  fc.innerHTML=(fo.value&&ft.value)
+   ?'<b>'+fo.value+' → '+ft.value+'</b> · '+(s>0?'+':'')+s+' ขั้นเสียง — '+capoText(s)
+   :'เลือกคีย์ทั้งสองช่องเพื่อคำนวณคาโป้';
+  fp.innerHTML=chartHTML(song,s,fl);
+ }
+ fo.onchange=up;ft.onchange=up;
+ fn.oninput=()=>{st.note=fn.value;save()};
+ fd.onchange=()=>{st.done=fd.checked;save();el.classList.toggle('done',fd.checked);
+  el.querySelector('.no').textContent=fd.checked?'✓':n};
+ el.querySelector('.mb').onclick=e=>{e.stopPropagation();openMetro(song.bpm)};
+ el.querySelector('.st').onclick=e=>{e.stopPropagation();openStage(i)};
+ up();return el;
+}
+
+/* ---- stage ---- */
+const stage=document.getElementById('stage'),sbody=document.getElementById('sbody'),
+      stitle=document.getElementById('stitle'),skey=document.getElementById('skey');
+let cur=0,extra=0,fsz=17,scroller=null;
+function openStage(i){cur=i;extra=0;stage.classList.add('on');paint()}
+function paint(){
+ const sg=SONGS[cur],st=G(cur);
+ const o=st.orig!==undefined?st.orig:sg.key, t=st.tgt!==undefined?st.tgt:sg.key;
+ stitle.textContent=(cur+1)+'. '+sg.t+' — '+sg.lead.split('·')[0].trim();
+ const total=((o&&t)?semis(o,t):0)+extra;
+ const fl=FLATKEY.has(t||o||'C');
+ skey.textContent=(o?sh(root(o),total,fl)+((o||'').endsWith('m')?'m':''):'—')+(extra?' '+(extra>0?'+':'')+extra:'');
+ sbody.style.fontSize=fsz+'px';
+ let h='';
+ if(sg.note)h+='<div class="info-note">'+sg.note+'</div>';
+ if(st.note)h+='<div class="info-note">คิว: '+st.note+'</div>';
+ h+=chartHTML(sg,total,fl);
+ sbody.innerHTML=h;sbody.scrollTop=0;
+}
+document.getElementById('stageBtn').onclick=()=>openStage(0);
+document.getElementById('sClose').onclick=()=>{stopScroll();stage.classList.remove('on')};
+document.getElementById('sPrev').onclick=()=>{cur=(cur-1+SONGS.length)%SONGS.length;extra=0;paint()};
+document.getElementById('sNext').onclick=()=>{cur=(cur+1)%SONGS.length;extra=0;paint()};
+document.getElementById('sUp').onclick=()=>{extra++;paint()};
+document.getElementById('sDown').onclick=()=>{extra--;paint()};
+document.getElementById('sFont').onclick=()=>{fsz=fsz>=28?14:fsz+3;paint()};
+document.getElementById('sMetro').onclick=()=>openMetro(SONGS[cur].bpm);
+const scB=document.getElementById('sScroll'),spd=document.getElementById('speed');
+function startScroll(){stopScroll();let acc=0;
+ scroller=setInterval(()=>{acc+=parseInt(spd.value,10)/12;
+  if(acc>=1){sbody.scrollTop+=Math.floor(acc);acc-=Math.floor(acc)}},40);
+ scB.textContent='หยุดเลื่อน';scB.classList.add('btn-primary')}
+function stopScroll(){if(scroller){clearInterval(scroller);scroller=null}
+ scB.textContent='เลื่อน';scB.classList.remove('btn-primary')}
+scB.onclick=()=>scroller?stopScroll():startScroll();
+sbody.addEventListener('touchstart',()=>{if(scroller)stopScroll()},{passive:true});
+document.addEventListener('keydown',e=>{if(!stage.classList.contains('on'))return;
+ if(e.key==='ArrowRight')document.getElementById('sNext').click();
+ if(e.key==='ArrowLeft')document.getElementById('sPrev').click();
+ if(e.key===' '){e.preventDefault();scB.click()}
+ if(e.key==='Escape')document.getElementById('sClose').click()});
+
+/* ---- metronome ---- */
+const metro=document.getElementById('metro'),beat=document.getElementById('beat'),
+      play=document.getElementById('play'),bpmR=document.getElementById('bpm'),bpmV=document.getElementById('bpmv');
+let ctx=null,timer=null,cnt=0;
+function openMetro(b){metro.classList.add('on');if(b){bpmR.value=b;bpmV.textContent=b;if(timer)start()}}
+document.getElementById('metroBtn').onclick=()=>metro.classList.toggle('on');
+document.getElementById('mClose').onclick=()=>{stop();metro.classList.remove('on')};
+bpmR.oninput=()=>{bpmV.textContent=bpmR.value;if(timer)start()};
+function click(acc){try{if(!ctx)ctx=new(window.AudioContext||window.webkitAudioContext)();
+ const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=acc?1600:1050;
+ g.gain.setValueAtTime(acc?.32:.18,ctx.currentTime);
+ g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.05);
+ o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.06)}catch(e){}
+ beat.classList.add('hit');setTimeout(()=>beat.classList.remove('hit'),70)}
+function start(){stop();const ms=60000/parseInt(bpmR.value,10);click(true);cnt=1;
+ timer=setInterval(()=>{click(cnt%4===0);cnt++},ms);play.textContent='หยุด'}
+function stop(){if(timer){clearInterval(timer);timer=null}play.textContent='เริ่ม'}
+play.onclick=()=>timer?stop():start();
+
+document.getElementById('themeBtn').onclick=()=>{
+ const c=document.documentElement.getAttribute('data-theme'),n=c==='dark'?'light':'dark';
+ document.documentElement.setAttribute('data-theme',n);
+ try{localStorage.setItem('bandpor.theme',n)}catch(e){}};
+try{const t=localStorage.getItem('bandpor.theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}
+
+render();
+</script>
+</body>
+</html>
